@@ -1,0 +1,70 @@
+---
+title: "Mileage per Gallon Predictor"
+author: "Sanket Bambodkar"
+date: "14 June 2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Application Summary
+
+This application predicts mileage per gallon of your car based on some specifications such as horsepower, number of cylinders and gear transmission mode.    
+The prediction model in based upon **mtcars** dataset in R
+
+```{r echo = FALSE, error = FALSE, comment=""}
+head(mtcars)
+```
+
+Source Code:
+[Github](http://github.com/gomugomu0034/Shiny-App)
+
+Application:
+[ShinyApp](https://sanketbambodkar.shinyapps.io/mpgpredictor/)
+
+## How It Works
+- The application is written in **Shiny** which is a web application framework for R   
+- The source code consists of two files: server.R and ui.R    
+- **server.R** includes the the server logic of a Shiny web application   
+- **ui.R** includes the the user-interface definition, which uses the sidebarLayout template    
+- The application is hosted on Rstudio's shiny server in the cloud (**Shinyapps.io**)  
+
+## Model Design
+Models are based on **mtcars** dataset in R   
+**Model 1** is a simplistic model with mileage per gallon as the outcome and horsepower as the predictor.    
+**Model 2** is a multivariable model which uses horsepower, number of cylinders and geat transmission mode as the predictors.   
+
+```{r eval=FALSE, error=FALSE, echo=TRUE, fig.align='center'}
+model1 <- lm(mpg ~ hp, data = mtcars)
+model2 <- lm(mpg ~ hp + factor(cyl) + factor(am), data = mtcars)
+hpInput <- input$hp
+if(input$am == "Automatic") {amInput <- 1} else {amInput <- 0}
+cylInput <- input$cyl
+model1pred <- reactive({
+          predict(model1, newdata = data.frame(hp = hpInput))})
+model2pred <- reactive({
+predict(model2, newdata = data.frame(hp = hpInput, 
+        cyl = cylInput, am = amInput))})
+```
+
+## Prediction Outpuut
+This is a graph between mileage per gallon (y axis) vs horsepower (x axis).   
+Red line denotes model 1 and blue line denotes model 2.    
+```{r eval=TRUE, error=FALSE, echo=FALSE, fig.align='center', warning=FALSE}
+model1 <- lm(mpg ~ hp, data = mtcars)
+model2 <- lm(mpg ~ hp + factor(cyl) + factor(am), data = mtcars)
+hpInput <- 200
+amInput <- 1
+cylInput <- 6
+model1pred <- predict(model1, newdata = data.frame(hp = hpInput))
+model2pred <- predict(model2, newdata = data.frame(hp = hpInput, 
+        cyl = cylInput, am = amInput))
+plot(mtcars$hp, mtcars$mpg, xlab = "Horsepower", ylab = "Miles per Gallon",
+        pch = 16, xlim = c(50,350), ylim = c(10,35)) +
+abline(model1,col = "red", lwd = 2)+
+abline(model2, col = "blue", lwd = 2)+
+points(hpInput, model1pred, col = "red", pch = 20, cex = 2)+
+points(hpInput, model2pred, col = "blue", pch = 20, cex = 2)
+```
